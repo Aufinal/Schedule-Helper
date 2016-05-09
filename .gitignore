@@ -1,0 +1,13 @@
+#Everything except specified
+*
+!*/
+
+!*.cpp
+!*.h
+!*.pl
+
+**/PaxHeader/
+
+#makefile
+!.gitignore
+!Makefile
