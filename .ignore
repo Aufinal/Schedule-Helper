@@ -1,0 +1,12 @@
+#Everything except specified
+*
+
+#C files
+*.cpp
+*.h
+
+#Perl files
+*.pl
+
+#makefile
+Makefile
