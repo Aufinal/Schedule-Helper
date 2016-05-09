@@ -6,8 +6,6 @@
 !*.h
 !*.pl
 
-**/PaxHeader/
-
 #makefile
 !.gitignore
 !Makefile
