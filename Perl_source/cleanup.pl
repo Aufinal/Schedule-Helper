@@ -3,7 +3,7 @@ use warnings ;
 use strict ;
 
 my $filename = "Amphi_sort.txt" ;
-my $filewrite = "../Amphi.txt" ;
+my $filewrite = "Amphi.txt" ;
 
 system "sort ../Amphi.txt > Amphi_sort.txt" ;
 

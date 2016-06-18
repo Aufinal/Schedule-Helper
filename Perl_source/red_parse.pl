@@ -4,8 +4,8 @@ use warnings ;
 use List::Util qw(max) ;
 
 my $html_file = $ARGV[0] ;
-my $file_TD = "../TD.txt" ;
-my $file_amphi = "../Amphi.txt" ;
+my $file_TD = "TD.txt" ;
+my $file_amphi = "Amphi.txt" ;
 
 open(my $fread, '<:encoding(UTF-8)', $html_file) or die "Couldn't open file $html_file : $!" ;
 open(my $fhTD, '>', $file_TD) or die "Couldn't open file $file_TD : $!" ;

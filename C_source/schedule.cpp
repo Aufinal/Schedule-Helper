@@ -15,7 +15,11 @@ void Schedule::import_html(std::string schedule, std::string dotations) {
 	std::string command = "perl Perl_source/red_parse.pl "+schedule ;
 	system(command.c_str());
 
-	FILE * f_td = fopen("../TD.txt", "r") ;
+	FILE * f_td = fopen("TD.txt", "r") ;
+    if (f_td == NULL) {
+        std::cout<<"Error : file TD.txt can't be opened"<<std::endl ;
+        return ;
+    }
 	int sem_read, h_begin, h_end ;
 	char cgroup[10] ; 
 	int eof_detect = 1 ;
@@ -34,7 +38,11 @@ void Schedule::import_html(std::string schedule, std::string dotations) {
 	}
 	fclose(f_td) ;
 
-	FILE * f_amphi = fopen("../Amphi.txt", "r") ;
+	FILE * f_amphi = fopen("Amphi.txt", "r") ;
+    if ( f_amphi == NULL) {
+        std::cout<<"Error : file Amphi.txt can't be opened"<<std::endl ;
+        return ;
+    }
 	eof_detect = 1 ;
 	while (eof_detect != EOF) {
 		eof_detect = fscanf(f_amphi, "%[^,],%d,%d,%d\n", cgroup, &sem_read, &h_begin, &h_end) ;
@@ -52,6 +60,11 @@ void Schedule::import_html(std::string schedule, std::string dotations) {
 	//system("rm -rf TD.txt Amphi.txt") ;
 	
 	FILE * f_total = fopen(dotations.c_str(), "r") ;
+    if ( f_total == NULL) {
+        std::cout<<"Error : file Amphi.txt can't be opened"<<std::endl ;
+        return ;
+    }
+   
 	eof_detect = 1 ;
 	float t1, t2 ;
 	while (eof_detect != EOF) {
