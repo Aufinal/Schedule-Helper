@@ -354,7 +354,7 @@ void Schedule::display(std::string name, int semester) {
 	}
 }
 
-static void split(std::string line, char delim, std::queue<std::string>& q) {
+void split(std::string line, char delim, std::queue<std::string>& q) {
     std::stringstream ss(line) ;
     std::string str ;
     while (std::getline(ss, str, delim)) {

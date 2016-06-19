@@ -57,4 +57,4 @@ class Schedule {
         void parse(std::string filename, int datatype) ;
 }; 
 
-static void split(std::string line, char delim, std::queue<std::string>& q) ;
+void split(std::string line, char delim, std::queue<std::string>& q) ;
