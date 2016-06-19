@@ -1,6 +1,7 @@
 #pragma once
 #include "teacher.h"
 #include <map>
+#include <queue>
 
 /* File Schedule.h : Schedule definition
  *
@@ -52,4 +53,8 @@ class Schedule {
 		void compatible_2groups(Teacher t, int semester) ;
 		void compatible_teachers(Group g, int semester) ;
 		void compatible_omsi(Teacher t, int semester) ;
+
+        void parse(std::string filename, int datatype) ;
 }; 
+
+static void split(std::string line, char delim, std::queue<std::string>& q) ;

@@ -1,8 +1,8 @@
 #include "config.h"
 #include "schedule.h" 
 #include <iostream>
-#include <cstdlib>
-#include <cstdio>
+#include <fstream>
+#include <sstream>
 
 Schedule::Schedule() {
 	classes = std::map<std::string, Group>() ;
@@ -15,72 +15,69 @@ void Schedule::import_html(std::string schedule, std::string dotations) {
 	std::string command = "perl Perl_source/red_parse.pl "+schedule ;
 	system(command.c_str());
 
-	FILE * f_td = fopen("TD.txt", "r") ;
-    if (f_td == NULL) {
-        std::cout<<"Error : file TD.txt can't be opened"<<std::endl ;
-        return ;
-    }
-	int sem_read, h_begin, h_end ;
-	char cgroup[10] ; 
-	int eof_detect = 1 ;
-	while (eof_detect != EOF) {
-		eof_detect = fscanf(f_td, "%[^,],%d,%d,%d\n", cgroup, &sem_read, &h_begin, &h_end) ;
-		
-        std::string str_group(cgroup) ;
-        std::map<std::string, Group>::iterator it = classes.find(str_group) ;
-        if (it == classes.end()) {
-            Group gr(str_group, false) ;
-            gr.add_hour(sem_read, h_begin, h_end) ;
-            classes.insert(std::pair<std::string, Group>(str_group, gr)) ;
-        } else {
-            it->second.add_hour(sem_read, h_begin, h_end) ;	
-        }
-	}
-	fclose(f_td) ;
+    parse("TD.txt", 0) ;
+    parse("Amphi.txt", 1) ;
+    parse(dotations, 2) ;
 
-	FILE * f_amphi = fopen("Amphi.txt", "r") ;
-    if ( f_amphi == NULL) {
-        std::cout<<"Error : file Amphi.txt can't be opened"<<std::endl ;
+    return ;
+    
+}
+
+void Schedule::parse(std::string filename, int datatype) {
+    std::ifstream file(filename) ;
+    if (!file.is_open()) {
+        std::cout<<"Error : impossible to open "<<filename<<std::endl ;
         return ;
     }
-	eof_detect = 1 ;
-	while (eof_detect != EOF) {
-		eof_detect = fscanf(f_amphi, "%[^,],%d,%d,%d\n", cgroup, &sem_read, &h_begin, &h_end) ;
-        std::string str_group(cgroup) ;
-        std::map<std::string, Group>::iterator it = classes.find(str_group) ;
-        if (it == classes.end()) {
-            Group gr(str_group, true) ;
-            gr.add_hour(sem_read, h_begin, h_end) ;
-            classes.insert(std::pair<std::string, Group>(str_group, gr)) ;
+    
+    std::string line ;
+    std::queue<std::string> parsedline ;
+    char delim = datatype==2 ? ';' : ',' ;
+    while (getline(file, line)) {
+        split(line, delim, parsedline) ;
+    
+        if (datatype == 2) {
+            if (parsedline.size()!=3) {
+                std::cout<<"Error : wrong format in dotation file"<<filename
+                        <<std::endl ;
+            }
+            std::string group = parsedline.front() ;
+            parsedline.pop() ;
+            int t1 = std::stoi(parsedline.front()) ;
+            parsedline.pop() ;
+            int t2 = std::stoi(parsedline.front()) ;
+            parsedline.pop() ;
+            try {
+                classes.at(group).total_time[0] = 2*t1 ;
+                classes.at(group).total_time[1] = 2*t2 ;
+            } catch (...) {
+			    std::cout<<"Error : dotation file contains unknown group "
+                        <<group<<std::endl ;
+            }
         } else {
-            it->second.add_hour(sem_read, h_begin, h_end) ;	
+            if (parsedline.size() != 4) {
+                std::cout<<"Error : wrong format in schedule file"<<filename
+                        <<std::endl ;
+            }
+            std::string group = parsedline.front() ;
+            parsedline.pop() ;
+            int sem = std::stoi(parsedline.front()) ;
+            parsedline.pop() ;
+            int h_begin = std::stoi(parsedline.front()) ;
+            parsedline.pop() ;
+            int h_end = std::stoi(parsedline.front()) ;
+            parsedline.pop() ;
+            try {
+                classes.at(group).add_hour(sem, h_begin, h_end) ;
+            } catch (...) {
+                Group g(group, (bool)datatype) ;
+                g.add_hour(sem, h_begin, h_end) ;
+                classes.insert(std::pair<std::string, Group>(group, g)) ;
+            }
         }
-	}
-	fclose(f_amphi) ;
-	//system("rm -rf TD.txt Amphi.txt") ;
-	
-	FILE * f_total = fopen(dotations.c_str(), "r") ;
-    if ( f_total == NULL) {
-        std::cout<<"Error : file Amphi.txt can't be opened"<<std::endl ;
-        return ;
-    }
-   
-	eof_detect = 1 ;
-	float t1, t2 ;
-	while (eof_detect != EOF) {
-		eof_detect = fscanf(f_total, "%[^;];%f;%f\n", cgroup, &t1, &t2) ;
-		std::string str_group(cgroup) ;
-		try {
-			    classes.at(cgroup).total_time[0] = 2*t1 ;
-			    classes.at(cgroup).total_time[1] = 2*t2 ;
-		}
-		catch (...) {
-			std::cout<<"Error : dotation file contains unknown group "<<cgroup<<std::endl ;
-		}
-		
-	}
-	fclose(f_total) ;
-	
+    }    
+    file.close() ;
+    return ;
 }
 
 void Schedule::add_teacher(std::string name) {
@@ -355,5 +352,14 @@ void Schedule::display(std::string name, int semester) {
 	} else {
 		it2->second.display(semester) ;
 	}
+}
+
+static void split(std::string line, char delim, std::queue<std::string>& q) {
+    std::stringstream ss(line) ;
+    std::string str ;
+    while (std::getline(ss, str, delim)) {
+        q.push(str) ;       
+    }
+    return ;
 }
 
